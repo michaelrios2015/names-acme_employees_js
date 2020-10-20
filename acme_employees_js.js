@@ -122,31 +122,47 @@ console.log(findCoworkersFor(findEmployeeByName('larry', employees), employees))
 spacer('');
 
 
+//this works but can be made simplier will come back to it :)
 const findManagementChainForEmployee = (employee, employees) =>{
-
-  //console.log(employees[0]['managerId']);
-
 
   //set managerID
 
-  const manager = findManagerFor(employee, employees);
+  //finds first manager
+  let manager = findManagerFor(employee, employees);
 
+  //first manager does not exisit
 if (manager === undefined){
   return [];
 }
 
-   managerID = manager.name;
-  console.log("managerID");
+  // manager = manager.managerId;
+  // console.log("managerID");
+  // console.log(manager);
 
-  console.log(managerID);
-  
 
   //make array to psuh in managers
 
-  // while (managerID)
+  const managers = [];
 
-  //  return findManagerFor(employee, employees);
+  //put in first manager 
+  managers.push(manager);
 
+
+  // check for mor
+  while (manager.managerId){
+
+    manager = findManagerFor(manager, employees);
+
+    if (manager === undefined){
+      break;
+    }
+
+    managers.push(manager);
+
+  }
+
+
+ return managers.reverse();
 
 }
 
@@ -166,8 +182,68 @@ console.log(findManagementChainForEmployee(findEmployeeByName('shep Jr.', employ
 spacer('');
 
 
+const generateManagementTree = (employees) => {
+
+  //let's start with moe..hmm can't start with moe or at least non of the 
+  //functions are set up to start with moe 
+
+  const managementTree = Object.assign({}, employees[0]);
+
+  managementTree.reports = [];
+
+
+  for (let i =1; i< employees.length; i++){
+
+    const managmentChain = findManagementChainForEmployee(employees[i], employees); 
+  // console.log(findManagementChainForEmployee(employees[i], employees));
+  
+  if (managmentChain.length === 1){
+    const copy = Object.assign({}, employees[i]);
+    copy.reports = [];
+    managementTree.reports.push(copy);
+  }
+
+  if (managmentChain.length === 2){
+    //can pretty much do the same thing but need to find who to attach it to
+    const copy = Object.assign({}, employees[i]);
+    copy.reports = [];
+    //console.log(employees[i].managerId);
+    for (let j =0; j<managementTree.reports.length; j++){
+      if (employees[i].managerId === managementTree.reports[j].id){
+        managementTree.reports[j].reports.push(copy);
+      }
+    }
+    //managementTree.reports.push(copy);
+  }
+
+  if (managmentChain.length === 3){
+    //can pretty much do the same thing but need to find who to attach it to
+    const copy = Object.assign({}, employees[i]);
+    copy.reports = [];
+    console.log(employees[i].managerId);
+    for (let j =0; j<managementTree.reports.length; j++){
+      for (let k =0; k<managementTree.reports[j].reports.length; k++){
+        if (employees[i].managerId === managementTree.reports[j].reports[k].id){
+          managementTree.reports[j].reports[k].reports.push(copy);
+        }
+        }
+    //managementTree.reports.push(copy);
+        }
+
+
+  }
+
+}
+return managementTree;
+  
+
+}
+
+
+
 spacer('generateManagementTree')
-//given a list of employees, generate a tree like structure for the employees, starting with the employee who has no manager. Each employee will have a reports property which is an array of the employees who report directly to them.
+//given a list of employees, generate a tree like structure for the employees, starting with the employee who has no manager. 
+//Each employee will have a reports property which is an array of the employees who report directly to them.
 console.log(JSON.stringify(generateManagementTree(employees), null, 2));
 /*
 {
