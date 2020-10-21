@@ -38,20 +38,17 @@ const spacer = (text)=> {
   console.log(`${stars} ${text} ${stars}`);
 }
 
-const findEmployeeByName = (name, arr) => 
-{
+const findEmployeeByName = (name, arr) => {
   
-  for (let i =0 ; i<arr.length; i++){
-
-    //console.log(arr[i]['name']);
-
-    if (arr[i]['name'] === name){
-      return arr[i];
-    }
-
-  }
-
-//console.log(name);
+  //console.log("find employees name")
+   
+  return arr.filter(item => item.name === name)[0];
+  // for (let i =0 ; i<arr.length; i++){
+  //   //console.log(arr[i]['name']);
+  //   if (arr[i]['name'] === name){
+  //     return arr[i];
+  //   }
+  // }
 
 
 
@@ -65,19 +62,15 @@ spacer('')
 
 const findManagerFor = (employee, arr) => {
 
-  // console.log(employee);
-  // console.log(employee['managerId']);
+ 
+  return arr.filter(item => item.id === employee['managerId'])[0];
 
-  //think i am supposed to use reduce
-  for (let i =0 ; i<arr.length; i++){
-
-    //console.log(arr[i]['name']);
-
-    if (arr[i]['id'] === employee['managerId']){
-      return arr[i];
-    }
-
-  }
+  // for (let i =0 ; i<arr.length; i++){
+  //   //console.log(arr[i]['name']);
+  //   if (arr[i]['id'] === employee['managerId']){
+  //     return arr[i];
+  //   }
+  // }
 
 
 }
@@ -91,22 +84,22 @@ spacer('')
 
 const findCoworkersFor= (employee, employees) => {
 
-//console.log(findManagerFor(employee, employees));
-
+//find the manager 
 const manager = findManagerFor(employee, employees);
-const coworkers = [];
-  //think i am supposed to use reduce
-  for (let i = 0 ; i < employees.length; i++){
 
-    //console.log(arr[i]['name']);
 
-    if (employees[i]['managerId'] === manager['id'] && employees[i]['name'] != employee['name']){
-      coworkers.push(employees[i]);
-    }
+return employees.filter(item => item['managerId'] === manager['id'] && item['name'] != employee['name']);
 
-  }
+// const coworkers = [];
+//   //think i am supposed to use reduce
+//   for (let i = 0 ; i < employees.length; i++){
+//     if (employees[i]['managerId'] === manager['id'] && employees[i]['name'] != employee['name']){
+//       coworkers.push(employees[i]);
+//     }
 
-return coworkers;
+//   }
+
+// return coworkers;
 
 }
 
@@ -125,44 +118,38 @@ spacer('');
 //this works but can be made simplier will come back to it :)
 const findManagementChainForEmployee = (employee, employees) =>{
 
-  //set managerID
-
-  //finds first manager
+//first manager
   let manager = findManagerFor(employee, employees);
+ //an array to store managers
+  const arr = []
 
-  //first manager does not exisit
-if (manager === undefined){
-  return [];
-}
-
-  // manager = manager.managerId;
-  // console.log("managerID");
-  // console.log(manager);
-
-
-  //make array to psuh in managers
-
-  const managers = [];
-
-  //put in first manager 
-  managers.push(manager);
-
-
-  // check for mor
-  while (manager.managerId){
-
-    manager = findManagerFor(manager, employees);
-
-    if (manager === undefined){
-      break;
-    }
-
-    managers.push(manager);
-
+ //keep going until we reach the top 
+ while (manager != undefined) {
+   
+     arr.push(manager);
+     manager = findManagerFor(manager, employees)
   }
 
+  //reverse the aray and return it
+  return arr.reverse();
 
- return managers.reverse();
+
+
+//an atttempt at recursive it works but managers are put in three different array... not sure how to carray an array over unless it's global but that 
+//could have other problems
+  // let manager = findManagerFor(employee, employees);
+
+  // const arr = []
+  // if (manager === undefined){
+  //   return arr;
+  // } else {
+
+  //   arr.push(manager);
+  //   findManagementChainForEmployee(manager, employees)
+  //   console.log(arr);
+  // }
+
+  // return arr;
 
 }
 
@@ -182,21 +169,58 @@ console.log(findManagementChainForEmployee(findEmployeeByName('shep Jr.', employ
 spacer('');
 
 
+//was trying to think of a better solution
+// const generateManagementTree = (employees) => {
+
+//   //let's start with moe..hmm can't start with moe or at least none of the 
+  
+//   //makes and object, puts Moe in first  
+//   const managementTree = Object.assign({}, employees[0]);
+
+//   //adds a report for Moe
+//   managementTree.reports = [];
+
+
+//   //going through all the employees
+//   for (let i = 1; i < employees.length; i++){
+
+//     //get the management chain
+//     const managmentChain = findManagementChainForEmployee(employees[i], employees); 
+  
+//     for (let j = 1; j < managmentChain.length; j++){
+      
+            
+ 
+
+//       //way to many if statements  
+//   if (managmentChain.length === 1){
+//     const copy = Object.assign({}, employees[i]);
+//     copy.reports = [];
+//     managementTree.reports.push(copy);
+//   }
+
+// }
+
+
+
 const generateManagementTree = (employees) => {
 
   //let's start with moe..hmm can't start with moe or at least non of the 
-  //functions are set up to start with moe 
-
+  
+  //makes and object, puts Moe in first  
   const managementTree = Object.assign({}, employees[0]);
 
+  //adds a report for Moe
   managementTree.reports = [];
 
 
+  //going through all the employees
   for (let i =1; i< employees.length; i++){
 
+    //get the management chain
     const managmentChain = findManagementChainForEmployee(employees[i], employees); 
-  // console.log(findManagementChainForEmployee(employees[i], employees));
   
+  //way to many if statements  
   if (managmentChain.length === 1){
     const copy = Object.assign({}, employees[i]);
     copy.reports = [];
