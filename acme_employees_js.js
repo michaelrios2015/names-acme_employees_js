@@ -116,40 +116,54 @@ spacer('');
 
 
 //this works but can be made simplier will come back to it :)
+
 const findManagementChainForEmployee = (employee, employees) =>{
 
+//no recursive way   
 //first manager
-  let manager = findManagerFor(employee, employees);
- //an array to store managers
-  const arr = []
+//   let manager = findManagerFor(employee, employees);
+//  //an array to store managers
+//   const arr = []
 
- //keep going until we reach the top 
- while (manager != undefined) {
+//  //keep going until we reach the top 
+//  while (manager != undefined) {
    
-     arr.push(manager);
-     manager = findManagerFor(manager, employees)
-  }
+//      arr.push(manager);
+//      manager = findManagerFor(manager, employees)
+//   }
 
-  //reverse the aray and return it
-  return arr.reverse();
+//   //reverse the aray and return it
+//   return arr.reverse();
 
 
 
 //an atttempt at recursive it works but managers are put in three different array... not sure how to carray an array over unless it's global but that 
 //could have other problems
-  // let manager = findManagerFor(employee, employees);
+  //let manager = findManagerFor(employee, employees);
 
-  // const arr = []
-  // if (manager === undefined){
-  //   return arr;
-  // } else {
+  //with recursion
+  //const arr = []
+  //the employee does not have a manager ID therefor no manager so return an empty array
+  if (!employee.managerId){
+    //debugger;
+    return [];
+  } else {
 
-  //   arr.push(manager);
-  //   findManagementChainForEmployee(manager, employees)
-  //   console.log(arr);
-  // }
+    //We call find management chain again but this time on the manager of the first employee
+    //so this moves us up the management chain at which point it becomes and [] then it works it way back down 
+    
+    const manager = findManagementChainForEmployee(findManagerFor(employee, employees), employees);
+    // console.log("manager one");
+    // console.log(manager);
 
-  // return arr;
+    //console.log(findManagerFor(employee, employees));
+    //it does not start pushing until after it has reached the top and is coming down again 
+    manager.push(findManagerFor(employee, employees));
+    //console.log("manager");
+    //console.log(manager);
+    //returns the array which now has the manager(s) pushed into it.  
+    return manager;
+  }
 
 }
 
@@ -167,6 +181,48 @@ console.log(findManagementChainForEmployee(findEmployeeByName('shep Jr.', employ
   { id: 4, name: 'shep', managerId: 2 }]
 */
 spacer('');
+
+
+//how vince did it pretty sure there most be a way to do it that uses the functions already created
+//I understand how vince did it though should try to write my own.. going to go back to yesterdays assignment first  
+function generateManagementTree(list) {
+ 
+  function getDirectReports(manager, list){
+    //employees directly under the manager  
+    const employeeList = list.filter((item) => manager.id === item.managerId);
+      
+      console.log("employeeList");
+      console.log(employeeList);
+      //no one is under the manager just add an empty array
+      if (employeeList.length === 0){
+          manager.reports = [];
+          //why do you need to return?? I guess the obj is not modified until returned 
+          return manager;
+        } else {
+          //go through each employee
+          employeeList.forEach((employee) => {
+            //see if they manage anyone
+            const person = getDirectReports(employee, list);
+            if (manager.reports) {
+              //if the reports array was all ready created push them into array
+              manager.reports.push(person);
+            } else {
+              //create reprts and put person in it
+              manager.reports = [person];
+            }
+          });
+        return manager;
+        } 
+  }
+
+  newList = list.map((item) => Object.assign({}, item));
+  
+  //console.log(newList);
+
+  //we send in the big boss moe and the list 
+  return getDirectReports(findEmployeeByName('moe', newList), newList);
+
+}
 
 
 //was trying to think of a better solution
@@ -203,72 +259,74 @@ spacer('');
 
 
 
-const generateManagementTree = (employees) => {
+// const generateManagementTree = (employees) => {
 
-  //let's start with moe..hmm can't start with moe or at least non of the 
+//   //let's start with moe..hmm can't start with moe or at least non of the 
   
-  //makes and object, puts Moe in first  
-  const managementTree = Object.assign({}, employees[0]);
+//   //makes and object, puts Moe in first  
+//   const managementTree = Object.assign({}, employees[0]);
 
-  //adds a report for Moe
-  managementTree.reports = [];
+//   //adds a report for Moe
+//   managementTree.reports = [];
 
 
-  //going through all the employees
-  for (let i =1; i< employees.length; i++){
+//   //going through all the employees
+//   for (let i =1; i< employees.length; i++){
 
-    //get the management chain
-    const managmentChain = findManagementChainForEmployee(employees[i], employees); 
+//     //get the management chain
+//     const managmentChain = findManagementChainForEmployee(employees[i], employees); 
   
-  //way to many if statements  
-  if (managmentChain.length === 1){
-    const copy = Object.assign({}, employees[i]);
-    copy.reports = [];
-    managementTree.reports.push(copy);
-  }
+//   //way to many if statements  
+//   if (managmentChain.length === 1){
+//     const copy = Object.assign({}, employees[i]);
+//     copy.reports = [];
+//     managementTree.reports.push(copy);
+//   }
 
-  if (managmentChain.length === 2){
-    //can pretty much do the same thing but need to find who to attach it to
-    const copy = Object.assign({}, employees[i]);
-    copy.reports = [];
-    //console.log(employees[i].managerId);
-    for (let j =0; j<managementTree.reports.length; j++){
-      if (employees[i].managerId === managementTree.reports[j].id){
-        managementTree.reports[j].reports.push(copy);
-      }
-    }
-    //managementTree.reports.push(copy);
-  }
+//   if (managmentChain.length === 2){
+//     //can pretty much do the same thing but need to find who to attach it to
+//     const copy = Object.assign({}, employees[i]);
+//     copy.reports = [];
+//     //console.log(employees[i].managerId);
+//     for (let j =0; j<managementTree.reports.length; j++){
+//       if (employees[i].managerId === managementTree.reports[j].id){
+//         managementTree.reports[j].reports.push(copy);
+//       }
+//     }
+//     //managementTree.reports.push(copy);
+//   }
 
-  if (managmentChain.length === 3){
-    //can pretty much do the same thing but need to find who to attach it to
-    const copy = Object.assign({}, employees[i]);
-    copy.reports = [];
-    console.log(employees[i].managerId);
-    for (let j =0; j<managementTree.reports.length; j++){
-      for (let k =0; k<managementTree.reports[j].reports.length; k++){
-        if (employees[i].managerId === managementTree.reports[j].reports[k].id){
-          managementTree.reports[j].reports[k].reports.push(copy);
-        }
-        }
-    //managementTree.reports.push(copy);
-        }
+//   if (managmentChain.length === 3){
+//     //can pretty much do the same thing but need to find who to attach it to
+//     const copy = Object.assign({}, employees[i]);
+//     copy.reports = [];
+//     console.log(employees[i].managerId);
+//     for (let j =0; j<managementTree.reports.length; j++){
+//       for (let k =0; k<managementTree.reports[j].reports.length; k++){
+//         if (employees[i].managerId === managementTree.reports[j].reports[k].id){
+//           managementTree.reports[j].reports[k].reports.push(copy);
+//         }
+//         }
+//     //managementTree.reports.push(copy);
+//         }
 
 
-  }
+//   }
 
-}
-return managementTree;
+// }
+// return managementTree;
   
 
-}
+// }
 
 
 
 spacer('generateManagementTree')
 //given a list of employees, generate a tree like structure for the employees, starting with the employee who has no manager. 
 //Each employee will have a reports property which is an array of the employees who report directly to them.
-console.log(JSON.stringify(generateManagementTree(employees), null, 2));
+
+ console.log(JSON.stringify(generateManagementTree(employees), null, 2));
+
 /*
 {
   "id": 1,
@@ -325,9 +383,14 @@ console.log(JSON.stringify(generateManagementTree(employees), null, 2));
 */
 spacer('');
 
+
 spacer('displayManagementTree')
+
 //given a tree of employees, generate a display which displays the hierarchy
-displayManagementTree(generateManagementTree(employees));/*
+
+// displayManagementTree(generateManagementTree(employees));
+/*
+
 moe
 -larry
 --shep
